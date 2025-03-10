@@ -34,7 +34,7 @@ if frontend == "nuxt":
         "OIDC_CLIENT_ID": oidc_client_id,
         "OIDC_CLIENT_SECRET": oidc_client_secret,
         "OIDC_ISSUER": "http://backend:8000/oidc",
-        "OIDC_WELL_KNOWN": "http://backend:8000/oidc/.well-known/openid-configuration"
+        "OIDC_WELL_KNOWN": "http://backend:8000/oidc/.well-known/openid-configuration",
     }
     dir_to_remove = "frontend-next"
     redirect_uri = "http://frontend:3000/auth/oidc/callback"
@@ -48,7 +48,7 @@ if frontend == "next":
         "OIDC_CLIENT_SECRET": oidc_client_secret,
         "OIDC_ISSUER": "http://backend:8000/oidc",
         "OIDC_WELL_KNOWN": "http://backend:8000/oidc/.well-known/openid-configuration",
-        "NEXTAUTH_URL": "http://frontend:3000"
+        "NEXTAUTH_URL": "http://frontend:3000",
     }
     dir_to_remove = "frontend-nuxt"
     redirect_uri = "http://frontend:3000/api/auth/callback/django"
@@ -71,7 +71,7 @@ env_back_variables = {
     "REDIRECT_URI": redirect_uri,
     # Django Admin
     "DJANGO_SUPERUSER_USERNAME": project_slug,
-    "DJANGO_SUPERUSER_EMAIL": f'admin@{project_slug}.com',
+    "DJANGO_SUPERUSER_EMAIL": f"admin@{project_slug}.com",
     "DJANGO_SUPERUSER_PASSWORD": secrets.token_urlsafe(32),
 }
 
