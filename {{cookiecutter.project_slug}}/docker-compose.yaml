@@ -1,0 +1,86 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4-alpine
+    #expose:
+    #  - "5432"
+    #ports:
+    #  - "5432:5432"
+    volumes:
+      - db:/var/lib/postgresql/data
+    environment:
+      PGPASSWORD: "${DB_PASSWORD:-secret}"
+      POSTGRES_DB: "${DB_DATABASE}"
+      POSTGRES_USER: "${DB_USER}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD:-secret}"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      timeout: 2s
+      retries: 10
+    networks:
+      - django-liberty
+  backend:
+    build:
+      context: backend
+    command:
+      [
+        "poetry",
+        "run",
+        "gunicorn",
+        "--bind",
+        ":8000",
+        "main.wsgi:application",
+        "--timeout",
+        "0",
+        "--workers",
+        "4",
+      ]
+    expose:
+      - "8000"
+    ports:
+      - "8000:8000"
+    volumes:
+      - backend:/app
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 2s
+      timeout: 2s
+      retries: 10
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - django-liberty
+  frontend:
+    build:
+      context: frontend-{{cookiecutter.frontend}}
+    command: ["bun", "run", "dev"]
+    expose:
+      - "3000"
+    ports:
+      - "3000:3000"
+    #volumes:
+    #  - frontend:/app
+    env_file:
+      - .env.frontend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 2s
+      timeout: 2s
+      retries: 10
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - django-liberty
+
+networks:
+  django-liberty:
+    driver: bridge
+
+volumes:
+  backend:
+  db:
+  frontend:
