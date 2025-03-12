@@ -5,7 +5,7 @@ Easy decoupled Django projects with OIDC Auth.
 ## LT;DR
 
 ```python
-cookiecutter https://github.com/roicort/django-liberty.git
+pip install cookiecutter && cookiecutter https://github.com/roicort/django-liberty.git
 ```
 
 ### What?
