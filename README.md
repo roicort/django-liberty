@@ -85,7 +85,7 @@ Below, you can find a command to install new dependency into backend project.
 docker compose exec backend poetry add djangorestframework
 ```
 
-For initializing the backend first run init.sh within the container
+For initializing the backend first run init.sh within the container (No longer needed)
 
 ```bash
 docker compose exec backend bash
@@ -95,7 +95,7 @@ docker compose exec backend bash
 bash init.sh
 ```
 
-And create a superuser
+And create a superuser (No longer needed, can be done through env)
 
 ```bash
 poetry run python createsuperuser
@@ -103,7 +103,7 @@ poetry run python createsuperuser
 
 ## ⚠️ Hosts config ⚠️
 
-In the case you want to locally try the OIDC login, you may add the backend to the hosts file.
+In the case you want to locally try the OIDC login, you may add the backend to the hosts file. Its necessary to have two separate hosts for the frontend and backend.
 
 ```bash
 sudo [vi/nano] /etc/hosts
@@ -134,7 +134,7 @@ There are two ways how to create new user account in the backend. First option i
 docker compose exec backend poetry run python manage.py createsuperuser
 ```
 
-The second option how to create new user account is to register it on the front end. The Django admin provides simple registration form.
+The second option how to create new user account is to register it on the front end. The Django admin provides simple registration form in account/signup/ endpoint. After the registration, the user account will be created in the backend.
 
 ### OpenAPI
 
