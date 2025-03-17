@@ -7,7 +7,7 @@ if [ "${DISABLE_DB_MIGRATIONS}" != "true" ] && [ ! -f /app/db_status ]; then
 
     poetry run python manage.py makemigrations
     poetry run python manage.py migrate
-    
+
     # Mark initialization as done
     echo "Successfuly migrated DB!"
     touch /app/db_status
