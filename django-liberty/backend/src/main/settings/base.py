@@ -21,7 +21,9 @@ FRONTEND_URL = environ.get("FRONTEND_URL", "http://localhost").strip()
 ALLOWED_HOSTS = [
     SITE_URL.replace("http://", "").replace("https://", ""),
     FRONTEND_URL.replace("http://", "").replace("https://", ""),
-] + environ.get("ALLOWED_HOSTS", "").replace("http://", "").replace("https://", "").split(",")
+] + environ.get("ALLOWED_HOSTS", "").replace("http://", "").replace(
+    "https://", ""
+).split(",")
 
 WSGI_APPLICATION = "main.wsgi.application"
 
