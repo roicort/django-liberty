@@ -1,0 +1,11 @@
+{
+  "project_slug": "django-liberty",
+  "project_name": "{{cookiecutter.project_slug}}",
+  "frontend": ["next"],
+  "_copy_without_render": [
+    "frontend-nuxt/*",
+    "frontend-next/*",
+    "django-liberty/*",
+    "backend/*.html"
+  ]
+}
