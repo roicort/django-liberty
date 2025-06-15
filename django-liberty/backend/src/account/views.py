@@ -7,7 +7,7 @@ from .forms import UserCreationForm
 class UserSignUp(View):
     def get(self, request, *args, **kwargs):
         form = UserCreationForm()
-        return render(request, "registration/signup.html", {"form": form})
+        return render(request, "signup.html", {"form": form})
 
     def post(self, request, *args, **kwargs):
         form = UserCreationForm(request.POST)
@@ -16,4 +16,4 @@ class UserSignUp(View):
             user.is_active = True
             user.save()
             return redirect("account:login")
-        return render(request, "registration/signup.html", {"form": form})
+        return render(request, "signup.html", {"form": form})
