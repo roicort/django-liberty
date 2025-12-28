@@ -1,4 +1,4 @@
-FROM python:3.12-alpine
+FROM python:3.13-alpine
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 ENV PYTHONUNBUFFERED=1
@@ -12,11 +12,11 @@ RUN apk update && apk add --no-cache \
 
 WORKDIR /app
 
-COPY pyproject.toml ./
+COPY . .
 
-COPY src .
+WORKDIR /app/src
 
 RUN uv run manage.py collectstatic --noinput
 
-ENTRYPOINT ["sh","entrypoint.sh"]
+ENTRYPOINT ["sh","/app/entrypoint.sh"]
 CMD ["uv", "run", "gunicorn","--bind", ":8000", "main.wsgi:application"]

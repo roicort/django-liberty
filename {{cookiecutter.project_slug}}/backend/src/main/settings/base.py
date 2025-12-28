@@ -3,6 +3,7 @@ from pathlib import Path
 
 from django.core.management.utils import get_random_secret_key
 from django.urls import reverse_lazy
+from django.utils.csp import CSP
 from django.utils.translation import gettext_lazy as _
 
 ######################################################################
@@ -13,17 +14,40 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = environ.get("SECRET_KEY", get_random_secret_key())
 
-DEBUG = environ.get("DEBUG", False)
+DEBUG = str(environ.get("DEBUG", "true")).lower() in ("1", "true", "yes", "on")
 
 SITE_URL = environ.get("DJANGO_URL", "http://localhost").strip()
 FRONTEND_URL = environ.get("FRONTEND_URL", "http://localhost").strip()
 
+
+def _clean_host(value):
+    if not value:
+        return ""
+    return value.replace("http://", "").replace("https://", "").strip().strip("/")
+
+
 ALLOWED_HOSTS = [
-    SITE_URL.replace("http://", "").replace("https://", ""),
-    FRONTEND_URL.replace("http://", "").replace("https://", ""),
-] + environ.get("ALLOWED_HOSTS", "").replace("http://", "").replace(
-    "https://", ""
-).split(",")
+    host
+    for host in [
+        _clean_host(SITE_URL),
+        _clean_host(FRONTEND_URL),
+        *[_clean_host(host) for host in environ.get("ALLOWED_HOSTS", "").split(",")],
+    ]
+    if host
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    origin
+    for origin in [
+        SITE_URL.strip().rstrip("/"),
+        FRONTEND_URL.strip().rstrip("/"),
+        *[
+            origin.strip().rstrip("/")
+            for origin in environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
+        ],
+    ]
+    if origin
+]
 
 WSGI_APPLICATION = "main.wsgi.application"
 
@@ -34,10 +58,11 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 ######################################################################
 # Security
 
-CSRF_TRUSTED_ORIGINS = [
-    SITE_URL,
-    FRONTEND_URL,
-]
+SECURE_CSP = {
+    "default-src": [CSP.SELF],
+    "script-src": [CSP.SELF, CSP.NONCE],
+    "img-src": [CSP.SELF, "https:"],
+}
 
 ######################################################################
 # Apps
@@ -49,7 +74,7 @@ INSTALLED_APPS = [
     "unfold.contrib.forms",  # optional, if special form elements are needed
     "unfold.contrib.inlines",  # optional, if special inlines are needed
     "unfold.contrib.import_export",  # optional, if django-import-export package is used
-    # "unfold.contrib.guardian",  # optional, if django-guardian package is used
+    "unfold.contrib.guardian",  # optional, if django-guardian package is used
     "unfold.contrib.simple_history",  # optional, if django-simple-history package is used
     # Django Contrib
     "django.contrib.admin",
@@ -230,24 +255,24 @@ UNFOLD = {
 # Print Settings
 ######################################################################
 
-print(f"DEBUG: {DEBUG}")
-print(f"ALLOWED_HOSTS: {ALLOWED_HOSTS}")
-print(f"CSRF_TRUSTED_ORIGINS: {CSRF_TRUSTED_ORIGINS}")
-print(f"DJANGO_URL: {SITE_URL}")
-print(f"FRONTEND_URL: {FRONTEND_URL}")
-print(f"WSGI_APPLICATION: {WSGI_APPLICATION}")
-print(f"ROOT_URLCONF: {ROOT_URLCONF}")
-print(f"DEFAULT_AUTO_FIELD: {DEFAULT_AUTO_FIELD}")
-print(f"INSTALLED_APPS: {INSTALLED_APPS}")
-print(f"MIDDLEWARE: {MIDDLEWARE}")
-print(f"TEMPLATES: {TEMPLATES}")
-print(f"DATABASES: {DATABASES}")
-print(f"AUTH_USER_MODEL: {AUTH_USER_MODEL}")
-print(f"LOGIN_URL: {LOGIN_URL}")
-print(f"LANGUAGE_CODE: {LANGUAGE_CODE}")
-print(f"TIME_ZONE: {TIME_ZONE}")
-print(f"USE_I18N: {USE_I18N}")
-print(f"USE_TZ: {USE_TZ}")
-print(f"STATIC_ROOT: {STATIC_ROOT}")
-print(f"STATIC_URL: {STATIC_URL}")
-print(f"MEDIA_ROOT: {MEDIA_ROOT}")
+if DEBUG:
+    print(f"ALLOWED_HOSTS: {ALLOWED_HOSTS}")
+    print(f"CSRF_TRUSTED_ORIGINS: {CSRF_TRUSTED_ORIGINS}")
+    print(f"DJANGO_URL: {SITE_URL}")
+    print(f"FRONTEND_URL: {FRONTEND_URL}")
+    print(f"WSGI_APPLICATION: {WSGI_APPLICATION}")
+    print(f"ROOT_URLCONF: {ROOT_URLCONF}")
+    print(f"DEFAULT_AUTO_FIELD: {DEFAULT_AUTO_FIELD}")
+    print(f"INSTALLED_APPS: {INSTALLED_APPS}")
+    print(f"MIDDLEWARE: {MIDDLEWARE}")
+    print(f"TEMPLATES: {TEMPLATES}")
+    print(f"DATABASES: {DATABASES}")
+    print(f"AUTH_USER_MODEL: {AUTH_USER_MODEL}")
+    print(f"LOGIN_URL: {LOGIN_URL}")
+    print(f"LANGUAGE_CODE: {LANGUAGE_CODE}")
+    print(f"TIME_ZONE: {TIME_ZONE}")
+    print(f"USE_I18N: {USE_I18N}")
+    print(f"USE_TZ: {USE_TZ}")
+    print(f"STATIC_ROOT: {STATIC_ROOT}")
+    print(f"STATIC_URL: {STATIC_URL}")
+    print(f"MEDIA_ROOT: {MEDIA_ROOT}")
