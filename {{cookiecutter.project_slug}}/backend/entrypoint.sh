@@ -2,7 +2,7 @@
 set -e
 
 # Check if the initialization has already been done and that we enabled automatic migration
-if [ "${DISABLE_DB_MIGRATIONS}" != "true" ] && [ ! -f /app/db_status ]; then
+if [ "${DISABLE_DB_MIGRATIONS}" != "true" ] && [ ! -f ./db_status ]; then
     echo "Running database setup and migrations..."
 
     uv run manage.py makemigrations
@@ -10,10 +10,10 @@ if [ "${DISABLE_DB_MIGRATIONS}" != "true" ] && [ ! -f /app/db_status ]; then
 
     # Mark initialization as done
     echo "Successfuly migrated DB!"
-    touch /app/db_status
+    touch ./db_status
 fi
 
-if [ ! -f /app/first_config ]; then
+if [ ! -f ./first_config ]; then
     echo "Running first configuration..."
 
     uv run manage.py creatersakey
@@ -23,7 +23,7 @@ if [ ! -f /app/first_config ]; then
 
     # Mark first configuration as done
     echo "Successfuly configured the app!"
-    touch /app/first_config
+    touch ./first_config
 fi
 
 
