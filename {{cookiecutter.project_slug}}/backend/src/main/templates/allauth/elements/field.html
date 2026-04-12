@@ -1,0 +1,95 @@
+{% load allauth %}
+
+{% with field=attrs.bound_field widget=attrs.bound_field.field.widget value=attrs.bound_field.value %}
+    {% if field.is_hidden %}
+        {{ field }}
+    {% elif widget.input_type == "checkbox" or widget.input_type == "radio" %}
+        <div class="mb-4">
+            <label for="{{ field.id_for_label }}" class="flex items-start gap-3 rounded-default border border-base-200 px-4 py-3 text-sm text-font-default-light dark:border-base-700 dark:text-font-default-dark">
+                <input
+                    {% if field.field.required %}required{% endif %}
+                    {% if widget.input_type %}type="{{ widget.input_type }}"{% endif %}
+                    name="{{ field.html_name }}"
+                    id="{{ field.id_for_label }}"
+                    class="mt-1"
+                    {% if value is not None %}value="{{ value }}"{% endif %}
+                    {% if widget.attrs.disabled %}disabled{% endif %}
+                    {% if value %}checked{% endif %}>
+                <span>
+                    {{ field.label }}
+                    {% if field.help_text %}
+                        <span class="mt-1 block text-xs text-base-500 dark:text-base-400">{{ field.help_text|safe }}</span>
+                    {% endif %}
+                </span>
+            </label>
+            {% for error in field.errors %}
+                <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
+            {% endfor %}
+        </div>
+    {% elif field.field.choices %}
+        <div class="mb-4">
+            {% if not attrs.unlabeled %}
+                <label for="{{ field.id_for_label }}" class="mb-2 block text-sm font-medium text-font-important-light dark:text-font-important-dark">{{ field.label }}</label>
+            {% endif %}
+            <select
+                {% if field.field.required %}required{% endif %}
+                name="{{ field.html_name }}"
+                id="{{ field.id_for_label }}"
+                class="block w-full rounded-default border {% if field.errors %}border-red-300 dark:border-red-500/40{% else %}border-base-300 dark:border-base-700{% endif %} bg-white px-3 py-2.5 text-sm text-font-default-light shadow-xs outline-none transition placeholder:text-base-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 dark:bg-base-900 dark:text-font-default-dark dark:placeholder:text-base-500"
+                {% if widget.attrs.disabled %}disabled{% endif %}>
+                {% for option in field.field.choices %}
+                    <option value="{{ option.0 }}" {% if option.0 == value %}selected{% endif %}>{{ option.1 }}</option>
+                {% endfor %}
+            </select>
+            {% if field.help_text %}
+                <p class="mt-2 text-xs text-base-500 dark:text-base-400">{{ field.help_text|safe }}</p>
+            {% endif %}
+            {% for error in field.errors %}
+                <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
+            {% endfor %}
+        </div>
+    {% elif widget.input_type == "textarea" %}
+        <div class="mb-4">
+            {% if not attrs.unlabeled %}
+                <label for="{{ field.id_for_label }}" class="mb-2 block text-sm font-medium text-font-important-light dark:text-font-important-dark">{{ field.label }}</label>
+            {% endif %}
+            <textarea
+                {% if field.field.required %}required{% endif %}
+                rows="{{ widget.attrs.rows|default:'4' }}"
+                name="{{ field.html_name }}"
+                id="{{ field.id_for_label }}"
+                class="block w-full rounded-default border {% if field.errors %}border-red-300 dark:border-red-500/40{% else %}border-base-300 dark:border-base-700{% endif %} bg-white px-3 py-2.5 text-sm text-font-default-light shadow-xs outline-none transition placeholder:text-base-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 dark:bg-base-900 dark:text-font-default-dark dark:placeholder:text-base-500"
+                {% if widget.attrs.placeholder %}placeholder="{{ widget.attrs.placeholder }}"{% elif attrs.unlabeled %}placeholder="{{ field.label }}"{% endif %}
+                {% if widget.attrs.autocomplete %}autocomplete="{{ widget.attrs.autocomplete }}"{% endif %}
+                {% if widget.attrs.disabled %}disabled{% endif %}>{% if value is not None %}{{ value }}{% endif %}</textarea>
+            {% if field.help_text %}
+                <p class="mt-2 text-xs text-base-500 dark:text-base-400">{{ field.help_text|safe }}</p>
+            {% endif %}
+            {% for error in field.errors %}
+                <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="mb-4">
+            {% if not attrs.unlabeled %}
+                <label for="{{ field.id_for_label }}" class="mb-2 block text-sm font-medium text-font-important-light dark:text-font-important-dark">{{ field.label }}</label>
+            {% endif %}
+            <input
+                {% if field.field.required %}required{% endif %}
+                type="{{ widget.input_type|default:'text' }}"
+                name="{{ field.html_name }}"
+                id="{{ field.id_for_label }}"
+                class="block w-full rounded-default border {% if field.errors %}border-red-300 dark:border-red-500/40{% else %}border-base-300 dark:border-base-700{% endif %} bg-white px-3 py-2.5 text-sm text-font-default-light shadow-xs outline-none transition placeholder:text-base-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 dark:bg-base-900 dark:text-font-default-dark dark:placeholder:text-base-500"
+                {% if widget.attrs.placeholder %}placeholder="{{ widget.attrs.placeholder }}"{% elif attrs.unlabeled %}placeholder="{{ field.label }}"{% endif %}
+                {% if widget.attrs.autocomplete %}autocomplete="{{ widget.attrs.autocomplete }}"{% endif %}
+                {% if widget.attrs.disabled %}disabled{% endif %}
+                {% if value is not None %}value="{{ value }}"{% endif %}>
+            {% if field.help_text %}
+                <p class="mt-2 text-xs text-base-500 dark:text-base-400">{{ field.help_text|safe }}</p>
+            {% endif %}
+            {% for error in field.errors %}
+                <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}

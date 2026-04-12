@@ -1,0 +1,28 @@
+{% extends "unfold/layouts/skeleton.html" %}
+
+{% load i18n %}
+
+{% block title %}
+    {% block head_title %}{% endblock head_title %}
+    {% if current_site %}
+        | {{ current_site.name }}
+    {% elif site %}
+        | {{ site.name }}
+    {% else %}
+        | {% trans "Account" %}
+    {% endif %}
+{% endblock %}
+
+{% block extrahead %}
+    {{ block.super }}
+    {% block extra_head %}{% endblock extra_head %}
+{% endblock extrahead %}
+
+{% block base %}
+    {% block body %}
+        <main id="content">
+            {% block content %}{% endblock content %}
+        </main>
+    {% endblock body %}
+    {% block extra_body %}{% endblock extra_body %}
+{% endblock %}

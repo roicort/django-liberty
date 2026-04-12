@@ -17,8 +17,10 @@ urlpatterns = [
     path("api/", include(api_urls)),
     # Admin
     path("djadmin/", admin.site.urls),
-    # OIDC
-    path("oidc/", include("oidc_provider.urls", namespace="oidc_provider")),
+    # Headless Account API
+    path("api/auth/", include("allauth.headless.urls")),
     # Accounts
-    path("account/", include("account.urls")),
+    path("account/", include("allauth.urls")),
+    # OIDC
+    path("", include("allauth.idp.urls")),
 ]
