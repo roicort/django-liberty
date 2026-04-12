@@ -1,0 +1,42 @@
+{% extends "allauth/layouts/base.html" %}
+
+{% load i18n %}
+
+{% block bodyclass %}{{ block.super }} bg-base-50 dark:bg-base-900{% endblock %}
+
+{% block body %}
+    <div id="page" class="bg-white flex min-h-screen dark:bg-base-900">
+        <div class="flex grow items-center justify-center mx-auto px-4 py-16 relative">
+            <div class="w-full max-w-md">
+                <div class="mb-6 flex items-center justify-between text-sm">
+                    <a href="/" class="font-medium text-primary-600 hover:text-primary-700 dark:text-primary-500 dark:hover:text-primary-400">
+                        {% trans "Return to site" %}
+                    </a>
+                </div>
+
+                {% include "unfold/helpers/messages.html" %}
+
+                <div class="overflow-hidden rounded-default border border-base-200 bg-white shadow-xs dark:border-base-800 dark:bg-base-900">
+                    <div class="border-b border-base-200 px-6 py-5 dark:border-base-800">
+                        <p class="text-sm font-medium text-primary-600 dark:text-primary-500">
+                            {% trans "Account access" %}
+                        </p>
+                        <h1 class="mt-2 text-2xl font-semibold tracking-tight text-font-important-light dark:text-font-important-dark">
+                            {% if current_site %}
+                                {{ current_site.name }}
+                            {% elif site %}
+                                {{ site.name }}
+                            {% else %}
+                                {% trans "Authentication" %}
+                            {% endif %}
+                        </h1>
+                    </div>
+
+                    <div id="content" class="px-6 py-6 sm:px-8">
+                        {% block content %}{% endblock content %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock body %}

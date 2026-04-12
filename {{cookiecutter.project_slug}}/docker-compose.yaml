@@ -1,19 +1,21 @@
 services:
-  db:
-    image: postgis/postgis:16-3.4-alpine
-    #expose:
-    #  - "5432"
-    #ports:
-    #  - "5432:5432"
+  database:
+    image: postgis/postgis:18-3.6-alpine
+    platform: linux/amd64
+    expose:
+      - "5432"
+    ports:
+      - "5432:5432"
     volumes:
-      - db:/var/lib/postgresql/data
-    environment:
-      PGPASSWORD: "${DB_PASSWORD:-secret}"
-      POSTGRES_DB: "${DB_DATABASE}"
-      POSTGRES_USER: "${DB_USER}"
-      POSTGRES_PASSWORD: "${DB_PASSWORD:-secret}"
+      - database:/var/lib/postgresql
+    env_file:
+      - backend/.env
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -h 127.0.0.1 -U $$POSTGRES_USER -d $$POSTGRES_DB",
+        ]
       interval: 2s
       timeout: 2s
       retries: 10
@@ -22,51 +24,53 @@ services:
   backend:
     build:
       context: backend
-    command:
-      [
-        "uv",
-        "run",
-        "gunicorn",
-        "--bind",
-        ":8000",
-        "main.wsgi:application",
-        "--timeout",
-        "0",
-        "--workers",
-        "4",
-      ]
     expose:
       - "8000"
     ports:
       - "8000:8000"
+    env_file:
+      - backend/.env
     volumes:
       - backend:/app
-    env_file:
-      - .env
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/')",
+        ]
       interval: 2s
       timeout: 2s
       retries: 10
     depends_on:
-      db:
+      database:
         condition: service_healthy
     networks:
       - django-liberty
   frontend:
     build:
-      context: frontend-{{cookiecutter.frontend}}
-    command: ["bun", "run", "dev"]
+      context: frontend
+      args:
+        DJANGO_URL: ${DJANGO_URL:-http://127.0.0.1:8000}
+        FRONTEND_URL: ${FRONTEND_URL:-http://127.0.0.1:3000}
     expose:
       - "3000"
     ports:
       - "3000:3000"
-    #volumes:
-    #  - frontend:/app
     env_file:
-      - .env.frontend
+      - frontend/.env
+    environment:
+      DJANGO_URL: ${DJANGO_URL:-http://127.0.0.1:8000}
+      FRONTEND_URL: ${FRONTEND_URL:-http://127.0.0.1:3000}
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      test:
+        [
+          "CMD",
+          "bun",
+          "--eval",
+          "fetch('http://127.0.0.1:3000/').then((response) => { if (!response.ok) process.exit(1) }).catch(() => process.exit(1))",
+        ]
       interval: 2s
       timeout: 2s
       retries: 10
@@ -82,5 +86,5 @@ networks:
 
 volumes:
   backend:
-  db:
+  database:
   frontend:

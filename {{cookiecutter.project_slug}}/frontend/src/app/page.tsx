@@ -3,6 +3,8 @@ import SignIn from "../components/auth/signin-button";
 import { auth } from "@/auth";
 import { signOut } from "@/auth";
 
+type SessionData = Awaited<ReturnType<typeof auth>>;
+
 function SignOut() {
   return (
     <div>
@@ -18,26 +20,48 @@ function SignOut() {
   );
 }
 
-function SessionInfo({ data }) {
-  return data ? (
+function SessionInfo({ data }: { data: SessionData }) {
+  if (!data) {
+    return null;
+  }
+
+  const profile = data.profile as
+    | {
+        given_name?: string;
+        family_name?: string;
+        email?: string;
+      }
+    | undefined;
+  const account = data.account as
+    | {
+        access_token?: string;
+      }
+    | undefined;
+
+  const fullName = [profile?.given_name, profile?.family_name]
+    .filter(Boolean)
+    .join(" ");
+  const greeting = fullName || data.user?.name || data.user?.email || "there";
+
+  return (
     <div>
       <pre className="p-4 text-left bg-gray-100 dark:bg-neutral-800/30">
-        Hello, {data.profile.given_name} {data.profile.family_name}!
+        Hello, {greeting}!
       </pre>
       <pre className="p-4 text-left bg-gray-100 dark:bg-neutral-800/30">
-        ID: {data.user.id}
+        ID: {data.user?.id ?? "Unavailable"}
       </pre>
       <pre className="p-4 text-left bg-gray-100 dark:bg-neutral-800/30">
-        Email: {data.profile.email}
+        Email: {profile?.email ?? data.user?.email ?? "Unavailable"}
       </pre>
       <pre className="p-4 text-left bg-gray-100 dark:bg-neutral-800/30">
-        Token: {data.account.access_token}
+        Token: {account?.access_token ?? "Unavailable"}
       </pre>
     </div>
-  ) : null;
+  );
 }
 
-function HandleSign({ data }) {
+function HandleSign({ data }: { data: SessionData }) {
   return data ? <SignOut /> : <SignIn />;
 }
 
@@ -45,8 +69,8 @@ export default async function Home() {
   const session = await auth();
 
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+    <div className="grid min-h-screen grid-rows-[20px_1fr_20px] items-center justify-items-center gap-16 p-8 pb-20 font-(family-name:--font-geist-sans) sm:p-20">
+      <main className="row-start-2 flex flex-col items-center gap-8 sm:items-start">
         <Image
           className="dark:invert"
           src="/next.svg"
@@ -58,10 +82,10 @@ export default async function Home() {
         <h1 className="text-4xl font-bold text-center sm:text-left">
           Django Liberty 🗽
         </h1>
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
+        <ol className="list-inside list-decimal text-center text-sm/6 font-(family-name:--font-geist-mono) sm:text-left">
           <li className="mb-2 tracking-[-.01em]">
             Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
+            <code className="rounded bg-black/5 px-1 py-0.5 font-(family-name:--font-geist-mono) font-semibold dark:bg-white/6">
               app/page.tsx
             </code>
             .
@@ -86,8 +110,8 @@ export default async function Home() {
           </div>
 
           <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href={`${process.env.API_URL}/account/signup`}
+            className="flex h-10 w-full items-center justify-center rounded-full border border-solid border-black/8 px-4 text-sm font-medium transition-colors hover:border-transparent hover:bg-[#f2f2f2] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] sm:h-12 sm:w-auto sm:px-5 sm:text-base md:w-[158px]"
+            href={`${process.env.API_URL ?? "http://localhost:8000"}/account/signup`}
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -96,7 +120,7 @@ export default async function Home() {
         </div>
       </main>
 
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
+      <footer className="row-start-3 flex flex-wrap items-center justify-center gap-6">
         <a
           className="flex items-center gap-2 hover:underline hover:underline-offset-4"
           href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"

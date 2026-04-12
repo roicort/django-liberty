@@ -1,0 +1,84 @@
+{% extends "allauth/layouts/base.html" %}
+
+{% load i18n %}
+
+{% block body %}
+    <div id="page" class="flex min-h-screen bg-base-50 dark:bg-base-950">
+        <div id="main" class="flex min-w-0 grow flex-col bg-base-50 dark:bg-base-950">
+            <header class="border-b border-base-200 bg-white dark:border-base-800 dark:bg-base-900">
+                <div class="container mx-auto flex h-16 items-center justify-between gap-4 px-4">
+                    <div class="min-w-0">
+                        <a href="/" class="block truncate text-sm font-semibold text-font-important-light dark:text-font-important-dark">
+                            {% if current_site %}
+                                {{ current_site.name }}
+                            {% elif site %}
+                                {{ site.name }}
+                            {% else %}
+                                {% trans "Account" %}
+                            {% endif %}
+                        </a>
+                        <p class="text-xs text-base-500 dark:text-base-400">
+                            {% trans "Manage your session, email and password" %}
+                        </p>
+                    </div>
+
+                    <nav class="flex items-center gap-2 text-sm">
+                        {% if user.is_authenticated %}
+                            {% url 'account_logout' as logout_url_ %}
+                            {% if logout_url_ %}
+                                <a href="{{ logout_url_ }}" class="inline-flex items-center justify-center rounded-default border border-base-300 px-3 py-2 font-medium text-font-default-light transition hover:border-red-200 hover:bg-red-50 hover:text-red-700 dark:border-base-700 dark:text-font-default-dark dark:hover:border-red-500/30 dark:hover:bg-red-500/10 dark:hover:text-red-400">
+                                    {% trans "Sign Out" %}
+                                </a>
+                            {% endif %}
+                        {% else %}
+                            {% url 'account_login' as login_url_ %}
+                            {% if login_url_ %}
+                                <a href="{{ login_url_ }}" class="inline-flex items-center justify-center rounded-default border border-base-300 px-3 py-2 font-medium text-font-default-light transition hover:border-base-400 hover:bg-base-100 hover:text-font-important-light dark:border-base-700 dark:text-font-default-dark dark:hover:bg-base-800 dark:hover:text-font-important-dark">
+                                    {% trans "Sign In" %}
+                                </a>
+                            {% endif %}
+                            {% url 'account_signup' as signup_url_ %}
+                            {% if signup_url_ %}
+                                <a href="{{ signup_url_ }}" class="inline-flex items-center justify-center rounded-default bg-primary-600 px-3 py-2 font-medium text-white transition hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-400">
+                                    {% trans "Sign Up" %}
+                                </a>
+                            {% endif %}
+                        {% endif %}
+                    </nav>
+                </div>
+            </header>
+
+            <div class="grow px-4 pb-10 pt-6">
+                <div class="container mx-auto">
+                    {% include "unfold/helpers/messages.html" %}
+
+                    <div class="grid gap-6 lg:grid-cols-[18rem_minmax(0,1fr)]">
+                        <aside class="rounded-default border border-base-200 bg-white p-3 shadow-xs dark:border-base-800 dark:bg-base-900">
+                            <nav class="space-y-1">
+                                {% url 'account_email' as email_url_ %}
+                                {% if email_url_ %}
+                                    <a href="{{ email_url_ }}" class="flex items-center rounded-default px-3 py-2 text-sm font-medium text-font-default-light transition hover:bg-base-100 hover:text-font-important-light dark:text-font-default-dark dark:hover:bg-base-800 dark:hover:text-font-important-dark {% block nav_class_email %}{% endblock %}">
+                                        {% trans "Email addresses" %}
+                                    </a>
+                                {% endif %}
+
+                                {% url 'account_change_password' as change_password_url_ %}
+                                {% if change_password_url_ %}
+                                    <a href="{{ change_password_url_ }}" class="flex items-center rounded-default px-3 py-2 text-sm font-medium text-font-default-light transition hover:bg-base-100 hover:text-font-important-light dark:text-font-default-dark dark:hover:bg-base-800 dark:hover:text-font-important-dark {% block nav_class_password %}{% endblock %}">
+                                        {% trans "Password" %}
+                                    </a>
+                                {% endif %}
+                            </nav>
+                        </aside>
+
+                        <main id="content" class="min-w-0">
+                            <div class="rounded-default border border-base-200 bg-white p-6 shadow-xs dark:border-base-800 dark:bg-base-900 sm:p-8">
+                                {% block content %}{% endblock content %}
+                            </div>
+                        </main>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock body %}

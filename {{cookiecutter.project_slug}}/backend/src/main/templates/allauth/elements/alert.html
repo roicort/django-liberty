@@ -1,0 +1,6 @@
+{% load allauth %}
+
+<div role="alert" class="rounded-default border px-4 py-3 text-sm {% if attrs.level == 'error' %}border-red-200 bg-red-50 text-red-800 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300{% elif attrs.level == 'warning' %}border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300{% elif attrs.level == 'success' %}border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300{% else %}border-primary-200 bg-primary-50 text-primary-800 dark:border-primary-500/30 dark:bg-primary-500/10 dark:text-primary-300{% endif %}">
+    {% slot message %}
+    {% endslot %}
+</div>

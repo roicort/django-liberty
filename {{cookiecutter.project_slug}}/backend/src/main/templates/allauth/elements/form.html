@@ -1,0 +1,21 @@
+{% load allauth %}
+
+{% if attrs.form %}
+    {% for error in attrs.form.non_field_errors %}
+        <div class="mb-4 rounded-default border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300">{{ error }}</div>
+    {% endfor %}
+{% endif %}
+
+<form method="{{ attrs.method }}"
+      {% if attrs.action %}action="{{ attrs.action }}"{% endif %}
+      class="space-y-5">
+    {% slot body %}
+    {% endslot %}
+
+    {% if slots.actions %}
+        <div class="flex flex-col gap-3 pt-2">
+            {% slot actions %}
+            {% endslot %}
+        </div>
+    {% endif %}
+</form>

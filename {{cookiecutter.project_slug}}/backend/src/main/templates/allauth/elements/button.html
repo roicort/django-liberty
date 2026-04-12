@@ -1,0 +1,15 @@
+{% load allauth %}
+{% comment %} djlint:off {% endcomment %}
+<{% if attrs.href %}a href="{{ attrs.href }}"{% else %}button{% endif %}
+{% if attrs.form %} form="{{ attrs.form }}"{% endif %}
+{% if attrs.id %} id="{{ attrs.id }}"{% endif %}
+{% if attrs.name %} name="{{ attrs.name }}"{% endif %}
+{% if attrs.type %} type="{{ attrs.type }}"{% endif %}
+{% if attrs.value %} value="{{ attrs.value }}"{% endif %}
+{% if attrs.disabled %} disabled{% endif %}
+class="{% block class %}inline-flex items-center justify-center gap-2 rounded-default px-4 py-2 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-primary-500/40 {% if 'link' in attrs.tags %}px-0 py-0 text-primary-600 hover:text-primary-700 dark:text-primary-500 dark:hover:text-primary-400{% elif 'outline' in attrs.tags %}{% if 'danger' in attrs.tags %}border border-red-300 text-red-700 hover:bg-red-50 dark:border-red-500/40 dark:text-red-400 dark:hover:bg-red-500/10{% else %}border border-base-300 text-font-important-light hover:bg-base-100 dark:border-base-700 dark:text-font-important-dark dark:hover:bg-base-800{% endif %}{% elif 'secondary' in attrs.tags %}border border-base-300 bg-base-100 text-font-important-light hover:bg-base-200 dark:border-base-700 dark:bg-base-800 dark:text-font-important-dark dark:hover:bg-base-700{% elif 'danger' in attrs.tags %}bg-red-600 text-white hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-400{% else %}bg-primary-600 text-white hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-400{% endif %} {% if 'minor' in attrs.tags %}px-3 py-1.5 text-xs{% endif %}{% endblock %}">
+{% if not 'tool' in attrs.tags %}
+{% slot %}
+{% endslot %}
+{% endif %}
+</{% if attrs.href %}a{% else %}button{% endif %}>
