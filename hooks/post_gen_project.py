@@ -1,11 +1,10 @@
-import secrets
 import base64
-import random
 import json
-import shutil
 import os
+import random
+import secrets
+import shutil
 import subprocess
-
 
 context_str = r"""
 {{ cookiecutter | jsonify }}
@@ -141,12 +140,10 @@ os.makedirs("backend", exist_ok=True)
 os.makedirs(frontend_dir, exist_ok=True)
 
 with open(backend_env_path, "w") as f:
-    for key, value in env_back_variables.items():
-        f.write(f"{key}={value}\n")
+    f.writelines(f"{key}={value}\n" for key, value in env_back_variables.items())
 
 with open(frontend_env_path, "w") as f:
-    for key, value in env_front_variables.items():
-        f.write(f"{key}={value}\n")
+    f.writelines(f"{key}={value}\n" for key, value in env_front_variables.items())
 
 if os.path.exists("django-liberty"):
     shutil.rmtree("django-liberty")

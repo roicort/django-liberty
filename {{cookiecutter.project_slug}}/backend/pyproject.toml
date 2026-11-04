@@ -5,19 +5,27 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
-    "django>=6.0.4",
-    "django-filter>=25.2",
+    "django>=6.1.1",
+    "django-filter>=26.1",
+    "django-paradedb==0.13.0",
     "django-cors-headers>=4.9.0",
-    "django-allauth[headless,idp-oidc]>=65.15.1",
-    "django-unfold>=0.89.0",
+    "django-allauth[headless,idp-oidc]>=65.19.6",
+    "django-unfold>=0.108.0",
     "django-storages>=1.14.6",
-    "boto3>=1.42.87",
-    "djangorestframework>=3.17.1",
-    "drf-spectacular>=0.29.0",
-    "gunicorn>=25.3.0",
-    "psycopg[binary]>=3.3.3",
+    "boto3>=1.43.106",
+    "djangorestframework>=3.18.1",
+    "drf-spectacular>=0.30.0",
+    "gunicorn>=26.2.0",
+    "pillow>=12.3.0",
+    "psycopg[binary]>=3.3.6",
     "whitenoise>=6.12.0",
     "dotenv>=0.9.9",
+    "django-countries>=9.1.0",
+    "django-hijack>=3.7.8",
+    "requests>=2.34.2",
+    "django-health-check>=4.8.0",
+    "django-orbit>=0.13.0",
+    "ruff>=0.17.1",
 ]
 
 [tool.ruff]

@@ -1,6 +1,3 @@
-{% load allauth %}
-
-{% for bound_field in attrs.form %}
-    {% element field bound_field=bound_field unlabeled=attrs.unlabeled %}
-    {% endelement %}
-{% endfor %}
+{% load allauth %} {% for bound_field in attrs.form %} {% element field
+bound_field=bound_field unlabeled=attrs.unlabeled %} {% endelement %} {% endfor
+%}

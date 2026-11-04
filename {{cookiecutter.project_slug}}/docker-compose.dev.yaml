@@ -1,0 +1,80 @@
+services:
+  database:
+    image: paradedb/paradedb:latest
+    platform: linux/amd64
+    expose:
+      - "5432"
+    ports:
+      - "5432:5432"
+    env_file:
+      - backend/.env
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -h 127.0.0.1 -U $$POSTGRES_USER -d $$POSTGRES_DB",
+        ]
+      interval: 2s
+      timeout: 2s
+      retries: 10
+    networks:
+      - django-liberty
+  backend:
+    build:
+      context: backend
+    expose:
+      - "8000"
+    ports:
+      - "8000:8000"
+    env_file:
+      - backend/.env
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/manage.py:/app/manage.py
+      - ./backend/entrypoint.sh:/app/entrypoint.sh
+      - ./backend/first_run.sh:/app/first_run.sh
+    healthcheck:
+      test: [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request;
+          urllib.request.urlopen('http://localhost:8000/health/')",
+        ]
+      interval: 2s
+      timeout: 2s
+      retries: 10
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - django-liberty
+  frontend:
+    build:
+      context: frontend
+    command: sh -c "bun install && bun run dev --hostname 0.0.0.0"
+    expose:
+      - "3000"
+    ports:
+      - "3000:3000"
+    env_file:
+      - frontend/.env
+    environment:
+      NODE_ENV: development
+    volumes:
+      - ./frontend/src:/app
+      - frontend_node_modules:/app/node_modules
+      - frontend_next:/app/.next
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - django-liberty
+
+networks:
+  django-liberty:
+    driver: bridge
+
+volumes:
+  frontend_node_modules:
+  frontend_next:

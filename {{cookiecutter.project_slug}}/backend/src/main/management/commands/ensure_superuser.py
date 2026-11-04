@@ -2,7 +2,7 @@ import os
 
 from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
 
 class Command(BaseCommand):
@@ -16,12 +16,9 @@ class Command(BaseCommand):
         last_name = os.environ.get("DJANGO_SUPERUSER_LAST_NAME", "admin")
 
         if not email or not password:
-            self.stdout.write(
-                self.style.ERROR(
-                    "DJANGO_SUPERUSER_EMAIL and DJANGO_SUPERUSER_PASSWORD are required"
-                )
+            raise CommandError(
+                "DJANGO_SUPERUSER_EMAIL and DJANGO_SUPERUSER_PASSWORD are required"
             )
-            return
 
         user, created = user_model.objects.get_or_create(
             email=email,

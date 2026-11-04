@@ -17,6 +17,7 @@ if SRC_DIR not in sys.path:
 # set needed variables aren't disturbed.
 try:
     from pathlib import Path
+
     from dotenv import load_dotenv
 
     env_path = Path(BASE_DIR) / ".env"
@@ -25,6 +26,7 @@ try:
         load_dotenv(env_path)
 except ImportError:
     pass
+
 
 def main():
     """Run administrative tasks."""

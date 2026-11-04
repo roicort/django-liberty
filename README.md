@@ -75,6 +75,15 @@ docker compose up -d --build
 
 Then, open the browser and navigate to `http://localhost:3000` to see the front end part of the application. To access Django admin, navigate to `http://localhost:8000/djadmin/`.
 
+For development with live frontend and backend source mounts, use:
+
+```bash
+docker compose -f docker-compose.dev.yaml up --build
+```
+
+The frontend installs its dependencies on startup and keeps `node_modules` and
+the Next.js build cache in Docker volumes.
+
 ### Backend dependencies
 
 For dependency management in Django application we are using UV. When starting the project through the docker-compose command, it is checked for new dependencies as well. In the case they are not installed, docker will install them before running development server.

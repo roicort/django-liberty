@@ -2,7 +2,7 @@ import os
 from urllib.parse import urlsplit
 
 from allauth.idp.oidc.models import Client
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
 
 def _env_bool(name, default=False):
@@ -33,12 +33,7 @@ class Command(BaseCommand):
         client_secret = os.environ.get("OIDC_CLIENT_SECRET", "").strip()
 
         if not client_id or not client_secret:
-            self.stdout.write(
-                self.style.ERROR(
-                    "OIDC_CLIENT_ID and OIDC_CLIENT_SECRET are required"
-                )
-            )
-            return
+            raise CommandError("OIDC_CLIENT_ID and OIDC_CLIENT_SECRET are required")
 
         redirect_uri = os.environ.get("REDIRECT_URI", "").strip()
         redirect_uris = _env_list("OIDC_REDIRECT_URIS", default=[redirect_uri])

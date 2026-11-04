@@ -105,7 +105,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get("SECRET_KEY", get_random_secret_key())
 
-DEBUG = str(os.environ.get("DEBUG", "true")).lower() in ("1", "true", "yes", "on")
+DEBUG = _env_bool("DEBUG", False)
 
 SITE_URL = _ensure_scheme(os.environ.get("DJANGO_URL", "http://localhost").strip())
 FRONTEND_URL = _ensure_scheme(
@@ -174,21 +174,23 @@ SECURE_CSP = {
 ######################################################################
 INSTALLED_APPS = [
     # Unfold Admin
-    "unfold",  # before django.contrib.admin
-    "unfold.contrib.filters",  # optional, if special filters are needed
-    "unfold.contrib.forms",  # optional, if special form elements are needed
-    "unfold.contrib.inlines",  # optional, if special inlines are needed
-    "unfold.contrib.import_export",  # optional, if django-import-export package is used
-    "unfold.contrib.guardian",  # optional, if django-guardian package is used
-    "unfold.contrib.simple_history",  # optional, if django-simple-history package is used
+    "unfold",
+    "unfold.contrib.filters",
+    "unfold.contrib.forms",
+    "unfold.contrib.inlines",
+    # "unfold.contrib.import_export",  # optional, if django-import-export is used
+    # "unfold.contrib.guardian",  # optional, if django-guardian is used
+    "unfold.contrib.simple_history",
+    "unfold.contrib.hijack",
     # Django Contrib
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "django.contrib.sites",
     "django.contrib.staticfiles",
+    # Health checks
+    "health_check",
     # Allauth
     "allauth",
     "allauth.account",
@@ -196,10 +198,18 @@ INSTALLED_APPS = [
     "allauth.idp.oidc",
     # DRF
     "rest_framework",
+    "django_filters",
     "drf_spectacular",
+    # Search
+    "paradedb",
     # Third Party
     "corsheaders",
+    "django_countries",
     "storages",
+    "hijack",
+    "hijack.contrib.admin",
+    # Catalog
+    "catalog",
     # Users
     "users",
     # Main
@@ -208,6 +218,7 @@ INSTALLED_APPS = [
 
 if DEBUG:
     INSTALLED_APPS += [
+        "orbit",
         "whitenoise.runserver_nostatic",
     ]
 
@@ -225,7 +236,11 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "allauth.account.middleware.AccountMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "hijack.middleware.HijackUserMiddleware",
 ]
+
+if DEBUG:
+    MIDDLEWARE.insert(1, "orbit.middleware.OrbitMiddleware")
 
 ######################################################################
 # Templates
@@ -357,7 +372,7 @@ USE_TZ = True
 # Staticfiles
 ######################################################################
 
-STATIC_ROOT = BASE_DIR / "static"
+STATIC_ROOT = BASE_DIR.parent.parent / "staticfiles"
 STATIC_URL = "/static/"
 
 MEDIA_ROOT = BASE_DIR / "media"
@@ -367,13 +382,14 @@ MEDIA_URL = "/media/"
 # Storages and Static/Media Files
 ######################################################################
 
-STATIC_ROOT = BASE_DIR / "static"
+STATIC_ROOT = BASE_DIR.parent.parent / "staticfiles"
 STATIC_URL = "/static/"
 
 MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "/media/"
 
-USE_S3_STORAGE = _env_bool("S3_STORAGE_ENABLED", False)
+S3_STORAGE_ENABLED = _env_bool("S3_STORAGE_ENABLED", _env_bool("USE_S3_STORAGE", False))
+USE_S3_STORAGE = not DEBUG and S3_STORAGE_ENABLED
 
 if not USE_S3_STORAGE:
     STORAGES = {
@@ -440,9 +456,9 @@ else:
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-    "PAGE_SIZE": 10,
+    "PAGE_SIZE": 12,
     "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticated",
+        "rest_framework.permissions.IsAuthenticatedOrReadOnly",
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.SessionAuthentication",
@@ -453,25 +469,148 @@ REST_FRAMEWORK = {
 # Unfold
 ######################################################################
 UNFOLD = {
-    "SITE_HEADER": _("{{cookiecutter.project_name}}"),
-    "SITE_TITLE": _("{{cookiecutter.project_name}} Admin"),
+    "SITE_HEADER": _("Liberty"),
+    "SITE_TITLE": _("Django Liberty"),
+    "SITE_DROPDOWN": [
+        {
+            "icon": "diamond",
+            "title": "Frontend",
+            "link": FRONTEND_URL,
+            "attrs": {
+                "target": "_blank",
+            },
+        },
+    ],
     "SIDEBAR": {
         "show_search": True,
-        "show_all_applications": True,
+        "show_all_applications": False,
         "navigation": [
             {
-                "title": _("Navigation"),
+                "title": _("Catalogos"),
                 "separator": False,
                 "items": [
                     {
-                        "title": _("Users"),
-                        "icon": "person",
-                        "link": reverse_lazy("admin:users_user_changelist"),
+                        "title": _("Marcas"),
+                        "icon": "branding_watermark",
+                        "link": reverse_lazy("admin:catalog_make_changelist"),
                     },
                     {
-                        "title": _("Groups"),
+                        "title": _("Generaciones"),
+                        "icon": "category",
+                        "link": reverse_lazy(
+                            "admin:catalog_modelgeneration_changelist"
+                        ),
+                    },
+                    {
+                        "title": _("Modelos"),
+                        "icon": "category",
+                        "link": reverse_lazy("admin:catalog_basemodel_changelist"),
+                    },
+                    {
+                        "title": _("Vehiculos"),
+                        "icon": "directions_car",
+                        "link": reverse_lazy("admin:catalog_vehicle_changelist"),
+                    },
+                    {
+                        "title": _("Motores"),
+                        "icon": "precision_manufacturing",
+                        "link": reverse_lazy("admin:catalog_engine_changelist"),
+                    },
+                    {
+                        "title": _("Motores electricos"),
+                        "icon": "bolt",
+                        "link": reverse_lazy("admin:catalog_emotor_changelist"),
+                    },
+                    {
+                        "title": _("Baterias"),
+                        "icon": "battery_full",
+                        "link": reverse_lazy("admin:catalog_batterypack_changelist"),
+                    },
+                    {
+                        "title": _("Tanques"),
+                        "icon": "local_gas_station",
+                        "link": reverse_lazy("admin:catalog_fueltank_changelist"),
+                    },
+                    {
+                        "title": _("Powertrains"),
+                        "icon": "settings_input_component",
+                        "link": reverse_lazy("admin:catalog_powertrain_changelist"),
+                    },
+                    {
+                        "title": _("Transmisiones"),
+                        "icon": "sync_alt",
+                        "link": reverse_lazy("admin:catalog_transmission_changelist"),
+                    },
+                    {
+                        "title": _("Plataformas"),
                         "icon": "label",
-                        "link": reverse_lazy("admin:auth_group_changelist"),
+                        "link": reverse_lazy("admin:catalog_platform_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Configuracion de Vehiculo"),
+                "separator": False,
+                "items": [
+                    {
+                        "title": _("Seguridad"),
+                        "icon": "health_and_safety",
+                        "link": reverse_lazy("admin:catalog_safetypackage_changelist"),
+                    },
+                    {
+                        "title": _("Carga"),
+                        "icon": "ev_station",
+                        "link": reverse_lazy(
+                            "admin:catalog_chargingpackage_changelist"
+                        ),
+                    },
+                    {
+                        "title": _("Puertos de carga"),
+                        "icon": "power",
+                        "link": reverse_lazy("admin:catalog_chargingport_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Cumplimiento"),
+                "separator": False,
+                "items": [
+                    {
+                        "title": _("Recalls"),
+                        "icon": "campaign",
+                        "link": reverse_lazy("admin:catalog_recall_changelist"),
+                    },
+                    {
+                        "title": _("Records de cumplimiento"),
+                        "icon": "fact_check",
+                        "link": reverse_lazy(
+                            "admin:catalog_compliancerecord_changelist"
+                        ),
+                    },
+                    {
+                        "title": _("Certificaciones"),
+                        "icon": "verified",
+                        "link": reverse_lazy(
+                            "admin:catalog_regulatoryapproval_changelist"
+                        ),
+                    },
+                    {
+                        "title": _("Documentos fuente"),
+                        "icon": "description",
+                        "link": reverse_lazy(
+                            "admin:catalog_approvalsourcedocument_changelist"
+                        ),
+                    },
+                ],
+            },
+            {
+                "title": _("Acceso"),
+                "separator": False,
+                "items": [
+                    {
+                        "title": _("Usuarios"),
+                        "icon": "person",
+                        "link": reverse_lazy("admin:users_user_changelist"),
                     },
                 ],
             },
